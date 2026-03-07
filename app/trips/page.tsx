@@ -1,12 +1,9 @@
-
-import { TripCard } from "../../components/TripCard";
-import type { Trip, User } from "../../lib/travelStore";
+import { TripCard } from "../../components/trip/TripCard";
 import { fetchTravelSnapshot, toggleTripLike } from "../../lib/travelApi";
-import { useAuthStore } from "../../lib/authStore";
 
 export default async function TripsPage() {
   const snapshot = await fetchTravelSnapshot();
-  const {users, trips} = snapshot
+  const { users, trips } = snapshot;
 
   return (
     <div className="space-y-5">
@@ -30,31 +27,8 @@ export default async function TripsPage() {
         <div className="grid gap-4 md:grid-cols-2">
           {trips.map((trip) => {
             const author = users.find((u) => u.id === trip.userId) ?? users[0];
-            // const likedByCurrent =
-            //   currentUser && trip.likedByUserIds.includes(currentUser.id);
 
-            return (
-              <TripCard
-                key={trip.id}
-                trip={trip}
-                author={author}
-                // isLiked={!!currentUser && !!likedByCurrent}
-                likesCount={trip.likedByUserIds.length}
-                // onToggleLike={
-                //   currentUser
-                //     ? async () => {
-                //         const updated = await toggleTripLike(
-                //           trip.id,
-                //           currentUser.id,
-                //         );
-                //         setTrips((prev) =>
-                //           prev.map((t) => (t.id === updated.id ? updated : t)),
-                //         );
-                //       }
-                //     : undefined
-                // }
-              />
-            );
+            return <TripCard key={trip.id} trip={trip} author={author} />;
           })}
         </div>
       )}

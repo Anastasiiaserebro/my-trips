@@ -1,25 +1,30 @@
-'use client';
+"use client";
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import type { Trip, User } from "../lib/travelStore";
+import type { Trip, User } from "../../lib/travelStore";
+import { Like } from "./Like";
+import { useAuthStore } from "@/lib/authStore";
+import { toggleTripLike } from "@/lib/travelApi";
 
 type TripCardProps = {
   trip: Trip;
   author: User;
-  isLiked?: boolean;
-  likesCount?: number;
-  onToggleLike?: () => void;
 };
 
-export function TripCard({
-  trip,
-  author,
-  isLiked,
-  likesCount,
-  onToggleLike,
-}: TripCardProps) {
+export function TripCard({ trip, author }: TripCardProps) {
+  const likesCount = trip?.likedByUserIds.length;
+  const currentUser = useAuthStore((state) => state.currentUser);
+
+  const isLiked = currentUser && trip.likedByUserIds.includes(currentUser.id);
   const router = useRouter();
+
+  const onToggleLike = () =>
+    currentUser
+      ? async () => {
+          const updated = await toggleTripLike(trip.id, currentUser.id);
+        }
+      : undefined;
 
   const handleOpen = () => {
     router.push(`/trips/${trip.id}`);
@@ -34,11 +39,7 @@ export function TripCard({
   const ratingStars = "★★★★★".slice(0, trip.rating);
 
   return (
-    <button
-      type="button"
-      onClick={handleOpen}
-      className="glass-card flex w-full flex-col overflow-hidden text-left transition hover:-translate-y-0.5 hover:shadow-2xl"
-    >
+    <div className="glass-card flex w-full flex-col overflow-hidden text-leftl">
       <div className="relative h-40 w-full overflow-hidden sm:h-48">
         <Image
           src={trip.coverImage}
@@ -58,8 +59,8 @@ export function TripCard({
         <div className="absolute bottom-3 left-3 flex items-center gap-2 rounded-full bg-black/40 px-3 py-1 text-xs font-medium text-sky-50">
           <span className="text-[13px]">{ratingStars}</span>
           <span className="text-[11px] opacity-80">
-            {trip.rating}.0 / 5 •{" "}
-            {trip.approximateCost.toLocaleString("ru-RU")} {trip.currency}
+            {trip.rating}.0 / 5 • {trip.approximateCost.toLocaleString("ru-RU")}{" "}
+            {trip.currency}
           </span>
         </div>
       </div>
@@ -81,20 +82,7 @@ export function TripCard({
               })}
             </p>
           </div>
-          {/* {typeof isLiked === "boolean" ? (
-            <button
-              type="button"
-              onClick={handleLike}
-              className={`flex items-center gap-1 rounded-full px-2 py-1 text-[11px] font-medium ${
-                isLiked
-                  ? "bg-rose-500/10 text-rose-500"
-                  : "bg-sky-50 text-slate-500 hover:bg-sky-100"
-              }`}
-            >
-              <span>{isLiked ? "♥" : "♡"}</span>
-              <span>{likesCount ?? trip.likedByUserIds.length}</span>
-            </button>
-          ) : null} */}
+          <Like isLiked={isLiked} trip={trip} />
         </div>
         <div className="flex items-center justify-between border-t border-sky-50 pt-3 text-[11px] text-slate-500">
           <div className="flex items-center gap-2">
@@ -105,20 +93,21 @@ export function TripCard({
               {author.name.charAt(0).toUpperCase()}
             </span>
             <div className="flex flex-col">
-              <span className="font-medium text-slate-700">
-                {author.name}
-              </span>
-              <span className="text-[10px]">
-                из {author.homeCity}
-              </span>
+              <span className="font-medium text-slate-700">{author.name}</span>
+              <span className="text-[10px]">из {author.homeCity}</span>
             </div>
           </div>
-          <span className="rounded-full bg-sky-50 px-3 py-1 text-[10px] font-semibold uppercase tracking-wide text-sky-700">
-            Смотреть детали
-          </span>
+          <button
+            type="button"
+            onClick={handleOpen}
+            className="text-left transition hover:-translate-y-0.5 hover:shadow-2xl"
+          >
+            <span className="rounded-full bg-sky-50 px-3 py-1 text-[10px] font-semibold uppercase tracking-wide text-sky-700">
+              Смотреть детали
+            </span>
+          </button>
         </div>
       </div>
-    </button>
+    </div>
   );
 }
-

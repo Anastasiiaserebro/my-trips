@@ -1,4 +1,4 @@
-import { TripCard } from "../../../components/TripCard";
+import { TripCard } from "../../../components/trip/TripCard";
 import { fetchTravelSnapshot, toggleTripLike } from "../../../lib/travelApi";
 import Link from "next/link";
 
@@ -72,30 +72,7 @@ export default async function FriendProfilePage({
       ) : (
         <div className="grid gap-4 md:grid-cols-2">
           {userTrips.map((trip) => (
-            <TripCard
-              key={trip.id}
-              trip={trip}
-              author={user}
-              // isLiked={
-              //   currentUser
-              //     ? trip.likedByUserIds.includes(currentUser.id)
-              //     : false
-              // }
-              likesCount={trip.likedByUserIds.length}
-              // onToggleLike={
-              //   currentUser
-              //     ? async () => {
-              //         const updated = await toggleTripLike(
-              //           trip.id,
-              //           currentUser.id,
-              //         );
-              //         setTrips((prev) =>
-              //           prev.map((t) => (t.id === updated.id ? updated : t)),
-              //         );
-              //       }
-              //     : undefined
-              // }
-            />
+            <TripCard key={trip.id} trip={trip} author={user} />
           ))}
         </div>
       )}

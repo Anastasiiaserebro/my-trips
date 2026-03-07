@@ -1,5 +1,5 @@
 // import { useRouter } from "next/navigation";
-import { TripCard } from "../components/TripCard";
+import { TripCard } from "../components/trip/TripCard";
 import type { Trip, User } from "../lib/travelStore";
 import { fetchTravelSnapshot, toggleTripLike } from "../lib/travelApi";
 import { useAuthStore } from "../lib/authStore";
@@ -10,9 +10,6 @@ import { RedirectLink } from "@/components/main/RedirectLink";
 export default async function Home() {
   const snapshot = await fetchTravelSnapshot();
   const { users, trips } = snapshot;
-
-  // const router = useRouter();
-  // const currentUser = useAuthStore((state) => state.currentUser);
 
   const topTrips = trips.slice(0, 3);
 
@@ -77,34 +74,7 @@ export default async function Home() {
             {topTrips.map((trip) => {
               const author =
                 users.find((u) => u.id === trip.userId) ?? users[0];
-              return (
-                <TripCard
-                  key={trip.id}
-                  trip={trip}
-                  author={author}
-                  // isLiked={
-                  //   currentUser
-                  //     ? trip.likedByUserIds.includes(currentUser.id)
-                  //     : false
-                  // }
-                  likesCount={trip.likedByUserIds.length}
-                  // onToggleLike={
-                  //   currentUser
-                  //     ? async () => {
-                  //         const updated = await toggleTripLike(
-                  //           trip.id,
-                  //           currentUser.id,
-                  //         );
-                  //         setTrips((prev) =>
-                  //           prev.map((t) =>
-                  //             t.id === updated.id ? updated : t,
-                  //           ),
-                  //         );
-                  //       }
-                  //     : undefined
-                  // }
-                />
-              );
+              return <TripCard key={trip.id} trip={trip} author={author} />;
             })}
           </div>
         )}
