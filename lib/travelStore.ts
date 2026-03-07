@@ -1,0 +1,41 @@
+export type User = {
+  id: string;
+  name: string;
+  avatarColor: string;
+  homeCity: string;
+};
+
+export type Place = {
+  id: string;
+  name: string;
+  city: string;
+  note?: string;
+};
+
+export type Trip = {
+  id: string;
+  userId: string;
+  title: string;
+  city: string;
+  country: string;
+  startDate: string;
+  endDate: string;
+  days: number;
+  approximateCost: number;
+  currency: "₽" | "€" | "$";
+  rating: number;
+  coverImage: string;
+  notes?: string;
+  attractions: Place[];
+  cafes: Place[];
+  createdAt: string;
+  likedByUserIds: string[];
+};
+
+export type Comment = {
+  id: string;
+  tripId: string;
+  authorId: string;
+  message: string;
+  createdAt: string;
+};
