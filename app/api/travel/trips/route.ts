@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 import { createTrip } from "@/lib/serverTravelDb";
 import type { Trip } from "@/lib/travelStore";
 
@@ -8,7 +9,8 @@ export async function POST(request: Request) {
     "id" | "createdAt" | "likedByUserIds"
   >;
 
-  const newTrip = createTrip(body);
+  const newTrip = await createTrip(body);
+  revalidateTag("travelData", "max");
   return NextResponse.json(newTrip, { status: 201 });
 }
 

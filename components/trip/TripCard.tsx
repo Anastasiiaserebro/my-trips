@@ -20,7 +20,7 @@ export function TripCard({ trip, author }: TripCardProps) {
   const ratingStars = "★★★★★".slice(0, trip.rating);
 
   return (
-    <div className="glass-card flex w-full flex-col overflow-hidden text-leftl">
+    <div className="glass-card flex w-full flex-col overflow-hidden text-left">
       <div className="relative h-40 w-full overflow-hidden sm:h-48">
         <Image
           src={trip.coverImage}

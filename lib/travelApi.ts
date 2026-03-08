@@ -24,6 +24,7 @@ export async function fetchUserData(userId?: string): Promise<TravelSnapshot> {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ userId }),
+    next: { tags: ["travelData"] },
   });
 
   if (!response.ok) {
@@ -54,7 +55,7 @@ export async function addCommentToTrip(
   message: string,
 ): Promise<Comment> {
   const response = await fetch(
-    `${BASE_URL}/trips/${encodeURIComponent(tripId)}/comments`,
+    `${BASE_URL}/api/travel/trips/${encodeURIComponent(tripId)}/comments`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -69,12 +70,45 @@ export async function addCommentToTrip(
   return (await response.json()) as Comment;
 }
 
+export async function updateTrip(
+  tripId: string,
+  patch: Partial<Trip>,
+): Promise<Trip> {
+  const response = await fetch(
+    `${BASE_URL}/api/travel/trips/${encodeURIComponent(tripId)}`,
+    {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(patch),
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error("Не удалось обновить путешествие");
+  }
+
+  return (await response.json()) as Trip;
+}
+
+export async function deleteTrip(tripId: string): Promise<void> {
+  const response = await fetch(
+    `${BASE_URL}/api/travel/trips/${encodeURIComponent(tripId)}`,
+    {
+      method: "DELETE",
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error("Не удалось удалить путешествие");
+  }
+}
+
 export async function toggleTripLike(
   tripId: string,
   userId: string,
 ): Promise<Trip> {
   const response = await fetch(
-    `${BASE_URL}/trips/${encodeURIComponent(tripId)}/like`,
+    `${BASE_URL}/api/travel/trips/${encodeURIComponent(tripId)}/like`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },

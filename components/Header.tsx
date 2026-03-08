@@ -54,6 +54,7 @@ export function Header() {
         <nav className="hidden items-center gap-2 sm:flex">
           <NavLink href="/me" label="Мой профиль" />
           <NavLink href="/trips" label="Путешествия" />
+          <NavLink href="/favorites" label="Избранное" />
           <NavLink href="/friends" label="Друзья" />
         </nav>
 

@@ -1,256 +1,259 @@
-import type { User, Trip, Comment } from "./travelStore";
+import { prisma } from "./db";
+import type { User, Trip, Comment, Place } from "./travelStore";
 
-const users: User[] = [
-  {
-    id: "u1",
-    name: "Анастасия",
-    avatarColor: "#2563eb",
-    homeCity: "Москва",
-  },
-  {
-    id: "u2",
-    name: "Иван",
-    avatarColor: "#0ea5e9",
-    homeCity: "Санкт‑Петербург",
-  },
-  {
-    id: "u3",
-    name: "Мария",
-    avatarColor: "#6366f1",
-    homeCity: "Казань",
-  },
-];
-
-let trips: Trip[] = [
-  {
-    id: "t1",
-    userId: "u1",
-    title: "Весенний Стамбул",
-    city: "Стамбул",
-    country: "Турция",
-    startDate: "2025-04-10",
-    endDate: "2025-04-16",
-    days: 7,
-    approximateCost: 88000,
-    currency: "₽",
-    rating: 5,
-    coverImage:
-      "https://media.istockphoto.com/id/1327842864/ru/фото/голубая-мечеть-стамбула-знаменитое-место-посещения-турция.jpg?s=1024x1024&w=is&k=20&c=U7E2joF7VGV_YDYba0iKhEDS4tPUv18HYz3X7NJkxZU=",
-    notes:
-      "Идеальная весенняя поездка: тепло, но не жарко, мало туристов и потрясающие виды на Босфор.",
-    attractions: [
-      {
-        id: "p1",
-        name: "Голубая мечеть",
-        city: "Стамбул",
-        note: "Лучше приходить к открытию, пока мало людей.",
-      },
-      {
-        id: "p2",
-        name: "Галатская башня",
-        city: "Стамбул",
-        note: "Закат на смотровой площадке — must have.",
-      },
-    ],
-    cafes: [
-      {
-        id: "c1",
-        name: "Cafe Privato",
-        city: "Стамбул",
-        note: "Вкусные завтраки с видом на Галатский мост.",
-      },
-    ],
-    createdAt: "2025-04-20T10:00:00.000Z",
-    likedByUserIds: ["u2", "u3"],
-    comments: [
-      {
-        id: "cm1",
-        tripId: "t1",
-        authorId: "u2",
-        message: "Очень хочу в Стамбул весной, спасибо за советы по кафе!",
-        createdAt: "2025-04-21T09:15:00.000Z",
-      },
-    ],
-  },
-  {
-    id: "t2",
-    userId: "u2",
-    title: "Зимний Хельсинки",
-    city: "Хельсинки",
-    country: "Финляндия",
-    startDate: "2025-01-05",
-    endDate: "2025-01-09",
-    days: 5,
-    approximateCost: 120000,
-    currency: "₽",
-    rating: 4,
-    coverImage:
-      "https://media.istockphoto.com/id/183996236/ru/фото/хельсинки-финляндия.jpg?s=1024x1024&w=is&k=20&c=m7T7qvJlEYA03Hi_GmwPuomQw4OEFz0C03uw0ukzo1I=",
-    notes:
-      "Атмосферный северный город, много снега и уютных кафе. Немного дороговато, но того стоит.",
-    attractions: [
-      {
-        id: "p3",
-        name: "Суоменлинна",
-        city: "Хельсинки",
-        note: "Прогулка по крепости и море льда вокруг.",
-      },
-    ],
-    cafes: [
-      {
-        id: "c2",
-        name: "Cafe Regatta",
-        city: "Хельсинки",
-        note: "Очень атмосферное место на берегу залива.",
-      },
-    ],
-    createdAt: "2025-01-15T12:00:00.000Z",
-    likedByUserIds: ["u1"],
-    comments: [],
-  },
-  {
-    id: "t3",
-    userId: "u3",
-    title: "Уикенд в Баку",
-    city: "Баку",
-    country: "Азербайджан",
-    startDate: "2025-05-01",
-    endDate: "2025-05-04",
-    days: 4,
-    approximateCost: 65000,
-    currency: "₽",
-    rating: 5,
-    coverImage:
-      "https://media.istockphoto.com/id/690203164/ru/фото/огненные-башни-в-баку.jpg?s=1024x1024&w=is&k=20&c=JPKZsgo2bktddc9QyrpO70G3hcLQq-t7cQv_9dYCH-0=",
-    notes:
-      "Очень тёплый приём, вкусная еда и красивый старый город. Хочется вернуться ещё.",
-    attractions: [
-      {
-        id: "p4",
-        name: "Старый город Ичеришехер",
-        city: "Баку",
-        note: "Лучше гулять без карты и просто теряться в улочках.",
-      },
-    ],
-    cafes: [
-      {
-        id: "c3",
-        name: "Чайхана в старом городе",
-        city: "Баку",
-        note: "Чай с пахлавой и видом на улицы.",
-      },
-    ],
-    createdAt: "2025-05-06T18:30:00.000Z",
-    likedByUserIds: ["u1", "u2"],
-    comments: [
-      {
-        id: "cm2",
-        tripId: "t2",
-        authorId: "u1",
-        message: "Как насчёт следующей зимой вместе? Выглядит волшебно.",
-        createdAt: "2025-01-16T14:45:00.000Z",
-      },
-    ],
-  },
-];
-
-export function getUserTravelData(userId: string): {
-  trips: Trip[];
-} {
-  const currentTrips = trips.filter((trip) => trip.userId === userId);
+function mapDbTripToTrip(db: {
+  id: string;
+  userId: string;
+  title: string;
+  city: string;
+  country: string;
+  startDate: string;
+  endDate: string;
+  days: number;
+  approximateCost: number;
+  currency: string;
+  rating: number;
+  coverImage: string;
+  notes: string | null;
+  createdAt: string;
+  places: { id: string; name: string; city: string; note: string | null; type: string }[];
+  comments: { id: string; tripId: string; authorId: string; message: string; createdAt: string }[];
+  likes: { userId: string }[];
+}): Trip {
+  const attractions: Place[] = db.places
+    .filter((p) => p.type === "attraction")
+    .map((p) => ({ id: p.id, name: p.name, city: p.city, note: p.note ?? undefined }));
+  const cafes: Place[] = db.places
+    .filter((p) => p.type === "cafe")
+    .map((p) => ({ id: p.id, name: p.name, city: p.city, note: p.note ?? undefined }));
+  const comments: Comment[] = db.comments.map((c) => ({
+    id: c.id,
+    tripId: c.tripId,
+    authorId: c.authorId,
+    message: c.message,
+    createdAt: c.createdAt,
+  }));
+  const likedByUserIds = db.likes.map((l) => l.userId);
 
   return {
-    trips: currentTrips,
+    id: db.id,
+    userId: db.userId,
+    title: db.title,
+    city: db.city,
+    country: db.country,
+    startDate: db.startDate,
+    endDate: db.endDate,
+    days: db.days,
+    approximateCost: db.approximateCost,
+    currency: db.currency as "₽" | "€" | "$",
+    rating: db.rating,
+    coverImage: db.coverImage,
+    notes: db.notes ?? undefined,
+    attractions,
+    cafes,
+    createdAt: db.createdAt,
+    likedByUserIds,
+    comments,
   };
 }
 
-export function getAllTravelData(): {
-  users: User[];
-  trips: Trip[];
-} {
+function mapDbUserToUser(db: { id: string; name: string; avatarColor: string; homeCity: string }): User {
   return {
-    users,
-    trips,
+    id: db.id,
+    name: db.name,
+    avatarColor: db.avatarColor,
+    homeCity: db.homeCity,
   };
 }
 
-export function getTripById(tripId: string): Trip | undefined {
-  return trips.find((trip) => trip.id === tripId);
-}
-
-export function getUserById(userId: string): User | undefined {
-  return users.find((user) => user.id === userId);
-}
-
-export function createTrip(
-  input: Omit<Trip, "id" | "createdAt" | "likedByUserIds">,
-): Trip {
-  const newTrip: Trip = {
-    ...input,
-    id: `t${trips.length + 1}-${Date.now()}`,
-    createdAt: new Date().toISOString(),
-    likedByUserIds: [],
-  };
-  trips = [newTrip, ...trips];
-  return newTrip;
-}
-
-export function updateTrip(tripId: string, patch: Partial<Trip>): Trip | null {
-  let updated: Trip | null = null;
-  trips = trips.map((trip) => {
-    if (trip.id !== tripId) return trip;
-    updated = { ...trip, ...patch };
-    return updated;
+export async function getUserTravelData(userId: string): Promise<{ trips: Trip[] }> {
+  const dbTrips = await prisma.trip.findMany({
+    where: { userId },
+    include: { places: true, comments: true, likes: true },
+    orderBy: { createdAt: "desc" },
   });
-  return updated;
+  return {
+    trips: dbTrips.map(mapDbTripToTrip),
+  };
 }
 
-export function deleteTrip(tripId: string): boolean {
-  const before = trips.length;
-  trips = trips.filter((trip) => trip.id !== tripId);
-
-  return trips.length < before;
+export async function getAllTravelData(): Promise<{ users: User[]; trips: Trip[] }> {
+  const [users, dbTrips] = await Promise.all([
+    prisma.user.findMany(),
+    prisma.trip.findMany({
+      include: { places: true, comments: true, likes: true },
+      orderBy: { createdAt: "desc" },
+    }),
+  ]);
+  return {
+    users: users.map(mapDbUserToUser),
+    trips: dbTrips.map(mapDbTripToTrip),
+  };
 }
 
-export function createComment(
+export async function getTripById(tripId: string): Promise<Trip | undefined> {
+  const db = await prisma.trip.findUnique({
+    where: { id: tripId },
+    include: { places: true, comments: true, likes: true },
+  });
+  return db ? mapDbTripToTrip(db) : undefined;
+}
+
+export async function getUserById(userId: string): Promise<User | undefined> {
+  const db = await prisma.user.findUnique({
+    where: { id: userId },
+  });
+  return db ? mapDbUserToUser(db) : undefined;
+}
+
+export async function createTrip(
+  input: Omit<Trip, "id" | "createdAt" | "likedByUserIds">,
+): Promise<Trip> {
+  const cityFallback = input.city;
+  const attractions = input.attractions.map((p) => ({
+    id: p.id,
+    name: p.name,
+    city: p.city || cityFallback,
+    note: p.note,
+    type: "attraction" as const,
+  }));
+  const cafes = input.cafes.map((p) => ({
+    id: p.id,
+    name: p.name,
+    city: p.city || cityFallback,
+    note: p.note,
+    type: "cafe" as const,
+  }));
+
+  const db = await prisma.trip.create({
+    data: {
+      userId: input.userId,
+      title: input.title,
+      city: input.city,
+      country: input.country,
+      startDate: input.startDate,
+      endDate: input.endDate,
+      days: input.days,
+      approximateCost: input.approximateCost,
+      currency: input.currency,
+      rating: input.rating,
+      coverImage: input.coverImage,
+      notes: input.notes,
+      createdAt: new Date().toISOString(),
+      places: {
+        create: [...attractions, ...cafes],
+      },
+    },
+    include: { places: true, comments: true, likes: true },
+  });
+
+  return mapDbTripToTrip(db);
+}
+
+export async function updateTrip(tripId: string, patch: Partial<Trip>): Promise<Trip | null> {
+  const existing = await prisma.trip.findUnique({
+    where: { id: tripId },
+    include: { places: true, comments: true, likes: true },
+  });
+  if (!existing) return null;
+
+  const updateData: Record<string, unknown> = {};
+  if (patch.title != null) updateData.title = patch.title;
+  if (patch.city != null) updateData.city = patch.city;
+  if (patch.country != null) updateData.country = patch.country;
+  if (patch.startDate != null) updateData.startDate = patch.startDate;
+  if (patch.endDate != null) updateData.endDate = patch.endDate;
+  if (patch.days != null) updateData.days = patch.days;
+  if (patch.approximateCost != null) updateData.approximateCost = patch.approximateCost;
+  if (patch.currency != null) updateData.currency = patch.currency;
+  if (patch.rating != null) updateData.rating = patch.rating;
+  if (patch.coverImage != null) updateData.coverImage = patch.coverImage;
+  if (patch.notes != null) updateData.notes = patch.notes;
+
+  if (patch.attractions != null || patch.cafes != null) {
+    await prisma.place.deleteMany({ where: { tripId } });
+    const attractions = (patch.attractions ?? existing.places.filter((p) => p.type === "attraction")).map((p) => ({
+      id: p.id,
+      name: p.name,
+      city: p.city,
+      note: p.note,
+      type: "attraction" as const,
+    }));
+    const cafes = (patch.cafes ?? existing.places.filter((p) => p.type === "cafe")).map((p) => ({
+      id: p.id,
+      name: p.name,
+      city: p.city,
+      note: p.note,
+      type: "cafe" as const,
+    }));
+    await prisma.place.createMany({
+      data: [...attractions, ...cafes].map((p) => ({
+        id: p.id,
+        name: p.name,
+        city: p.city,
+        note: p.note,
+        tripId,
+        type: p.type,
+      })),
+    });
+  }
+
+  const db = await prisma.trip.update({
+    where: { id: tripId },
+    data: updateData,
+    include: { places: true, comments: true, likes: true },
+  });
+
+  return mapDbTripToTrip(db);
+}
+
+export async function deleteTrip(tripId: string): Promise<boolean> {
+  const result = await prisma.trip.deleteMany({
+    where: { id: tripId },
+  });
+  return result.count > 0;
+}
+
+export async function createComment(
   tripId: string,
   authorId: string,
   message: string,
-): Comment {
-  const newComment: Comment = {
-    id: `cm-${Date.now()}`,
-    tripId,
-    authorId,
-    message,
-    createdAt: new Date().toISOString(),
+): Promise<Comment> {
+  const db = await prisma.comment.create({
+    data: {
+      tripId,
+      authorId,
+      message: message.trim(),
+      createdAt: new Date().toISOString(),
+    },
+  });
+  return {
+    id: db.id,
+    tripId: db.tripId,
+    authorId: db.authorId,
+    message: db.message,
+    createdAt: db.createdAt,
   };
-
-  const currentTrip = trips.find((el) => el.id === tripId);
-  if (currentTrip) {
-    trips = [
-      ...trips,
-      { ...currentTrip, comments: [...currentTrip?.comments, newComment] },
-    ];
-  }
-
-  return newComment;
 }
 
-export function toggleTripLike(
-  tripId: string,
-  userId: string,
-): Trip | undefined {
-  let updatedTrip: Trip | undefined;
-  trips = trips.map((trip) => {
-    if (trip.id !== tripId) return trip;
-    const hasLike = trip.likedByUserIds.includes(userId);
-    updatedTrip = {
-      ...trip,
-      likedByUserIds: hasLike
-        ? trip.likedByUserIds.filter((id) => id !== userId)
-        : [...trip.likedByUserIds, userId],
-    };
-    return updatedTrip;
+export async function toggleTripLike(tripId: string, userId: string): Promise<Trip | undefined> {
+  const existing = await prisma.tripLike.findUnique({
+    where: { tripId_userId: { tripId, userId } },
   });
-  return updatedTrip;
+
+  if (existing) {
+    await prisma.tripLike.delete({
+      where: { tripId_userId: { tripId, userId } },
+    });
+  } else {
+    await prisma.tripLike.create({
+      data: { tripId, userId },
+    });
+  }
+
+  const db = await prisma.trip.findUnique({
+    where: { id: tripId },
+    include: { places: true, comments: true, likes: true },
+  });
+  return db ? mapDbTripToTrip(db) : undefined;
 }

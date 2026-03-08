@@ -3,7 +3,7 @@ import { getUserTravelData } from "@/lib/serverTravelDb";
 
 export async function POST(request: Request) {
   const body = await request.json();
-  const data = getUserTravelData(body.userId);
+  const data = await getUserTravelData(body.userId);
 
   return NextResponse.json(data);
 }

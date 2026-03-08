@@ -1,8 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import { useAuthStore } from "@/lib/authStore";
+import { toggleTripLike } from "@/lib/travelApi";
 import { Trip } from "@/lib/travelStore";
-import { useRouter } from "next/compat/router";
+import { useRouter } from "next/navigation";
 
 interface Props {
   trip: Trip;
@@ -11,39 +13,47 @@ interface Props {
 export function Like({ trip }: Props) {
   const router = useRouter();
   const currentUser = useAuthStore((state) => state.currentUser);
-  const likedTrips = useAuthStore((state) => state.likedTrips);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const likeTrips = useAuthStore((state) => state.likeTrip);
-  const dislikeLikedTrips = useAuthStore((state) => state.dislikeTrip);
-  const isLiked = likedTrips.includes(trip);
-  //   const updated = await toggleTripLike(trip.id, currentUser.id);
+  const isOwnTrip = trip.userId === currentUser?.id;
+  const isLiked = currentUser
+    ? trip.likedByUserIds.includes(currentUser.id)
+    : false;
 
-  // const onToggleLike = () =>
-  //   currentUser
-  //     ? async () => {
-  //         const updated = await toggleTripLike(trip.id, currentUser.id);
-  //       }
-  //     : undefined;
-
-  const handleLikeClick = () => {
+  const handleLikeClick = async () => {
     if (!currentUser || !trip) {
-      router?.push("/login");
+      router.push("/login");
       return;
     }
 
-    if (isLiked) {
-      dislikeLikedTrips(trip);
-      return;
-    }
+    if (isOwnTrip) return;
 
-    likeTrips(trip);
+    setIsSubmitting(true);
+    try {
+      await toggleTripLike(trip.id, currentUser.id);
+      router.refresh();
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
+  const canLike = currentUser && !isOwnTrip;
+
+  if (isOwnTrip) {
+    return (
+      <div className="inline-flex items-center gap-2 rounded-full bg-sky-50 px-4 py-1.5 text-xs font-semibold text-slate-500">
+        <span>♡</span>
+        <span>{trip.likedByUserIds.length} лайков</span>
+      </div>
+    );
+  }
 
   return (
     <button
       type="button"
       onClick={handleLikeClick}
-      className={`inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold ${
+      disabled={!canLike || isSubmitting}
+      className={`inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
         isLiked
           ? "bg-rose-500/10 text-rose-500"
           : "bg-sky-50 text-slate-600 hover:bg-sky-100"

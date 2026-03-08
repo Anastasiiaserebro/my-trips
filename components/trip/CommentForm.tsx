@@ -4,7 +4,7 @@ import { useAuthStore } from "@/lib/authStore";
 import { addCommentToTrip } from "@/lib/travelApi";
 import { Trip } from "@/lib/travelStore";
 import { zodResolver } from "@hookform/resolvers/zod";
-import router from "next/router";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import z from "zod";
 
@@ -22,6 +22,7 @@ interface Props {
 }
 
 export function CommentFrom({ trip }: Props) {
+  const router = useRouter();
   const currentUser = useAuthStore((state) => state.currentUser);
   const {
     register,
@@ -31,7 +32,7 @@ export function CommentFrom({ trip }: Props) {
   } = useForm<CommentFormValues>({
     resolver: zodResolver(commentSchema),
     defaultValues: { message: "" },
-    
+
   });
 
   const onSubmit = async (values: CommentFormValues) => {
@@ -40,12 +41,13 @@ export function CommentFrom({ trip }: Props) {
       return;
     }
 
-    const created = await addCommentToTrip(
+    await addCommentToTrip(
       trip.id,
       currentUser.id,
       values.message.trim(),
     );
     reset({ message: "" });
+    router.refresh();
   };
 
   return (
