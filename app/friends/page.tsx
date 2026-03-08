@@ -1,9 +1,8 @@
-import Link from "next/link";
-import { fetchTravelSnapshot } from "../../lib/travelApi";
+import { fetchTravelData } from "../../lib/travelApi";
 import { Friends } from "@/components/friends/Friends";
 
 export default async function FriendsPage() {
-  const { users, trips } = await fetchTravelSnapshot();
+  const { users, trips } = await fetchTravelData();
 
   return (
     <div className="space-y-5">

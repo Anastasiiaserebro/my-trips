@@ -1,9 +1,9 @@
-import { fetchTravelSnapshot } from "../../lib/travelApi";
+import { fetchTravelData } from "../../lib/travelApi";
 import Link from "next/link";
 import { CurrentUser } from "@/components/login/CurrentUser";
 
 export default async function LoginPage() {
-  const { users } = await fetchTravelSnapshot();
+  const { users } = await fetchTravelData();
 
   return (
     <div className="glass-card space-y-6 bg-white/95 p-6 sm:p-8">

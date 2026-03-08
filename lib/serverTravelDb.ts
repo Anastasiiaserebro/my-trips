@@ -62,6 +62,15 @@ let trips: Trip[] = [
     ],
     createdAt: "2025-04-20T10:00:00.000Z",
     likedByUserIds: ["u2", "u3"],
+    comments: [
+      {
+        id: "cm1",
+        tripId: "t1",
+        authorId: "u2",
+        message: "Очень хочу в Стамбул весной, спасибо за советы по кафе!",
+        createdAt: "2025-04-21T09:15:00.000Z",
+      },
+    ],
   },
   {
     id: "t2",
@@ -97,6 +106,7 @@ let trips: Trip[] = [
     ],
     createdAt: "2025-01-15T12:00:00.000Z",
     likedByUserIds: ["u1"],
+    comments: [],
   },
   {
     id: "t3",
@@ -132,35 +142,35 @@ let trips: Trip[] = [
     ],
     createdAt: "2025-05-06T18:30:00.000Z",
     likedByUserIds: ["u1", "u2"],
+    comments: [
+      {
+        id: "cm2",
+        tripId: "t2",
+        authorId: "u1",
+        message: "Как насчёт следующей зимой вместе? Выглядит волшебно.",
+        createdAt: "2025-01-16T14:45:00.000Z",
+      },
+    ],
   },
 ];
 
-let comments: Comment[] = [
-  {
-    id: "cm1",
-    tripId: "t1",
-    authorId: "u2",
-    message: "Очень хочу в Стамбул весной, спасибо за советы по кафе!",
-    createdAt: "2025-04-21T09:15:00.000Z",
-  },
-  {
-    id: "cm2",
-    tripId: "t2",
-    authorId: "u1",
-    message: "Как насчёт следующей зимой вместе? Выглядит волшебно.",
-    createdAt: "2025-01-16T14:45:00.000Z",
-  },
-];
+export function getUserTravelData(userId: string): {
+  trips: Trip[];
+} {
+  const currentTrips = trips.filter((trip) => trip.userId === userId);
+
+  return {
+    trips: currentTrips,
+  };
+}
 
 export function getAllTravelData(): {
   users: User[];
   trips: Trip[];
-  comments: Comment[];
 } {
   return {
     users,
     trips,
-    comments,
   };
 }
 
@@ -198,7 +208,7 @@ export function updateTrip(tripId: string, patch: Partial<Trip>): Trip | null {
 export function deleteTrip(tripId: string): boolean {
   const before = trips.length;
   trips = trips.filter((trip) => trip.id !== tripId);
-  comments = comments.filter((comment) => comment.tripId !== tripId);
+
   return trips.length < before;
 }
 
@@ -214,12 +224,16 @@ export function createComment(
     message,
     createdAt: new Date().toISOString(),
   };
-  comments = [...comments, newComment];
-  return newComment;
-}
 
-export function getCommentsForTrip(tripId: string): Comment[] {
-  return comments.filter((comment) => comment.tripId === tripId);
+  const currentTrip = trips.find((el) => el.id === tripId);
+  if (currentTrip) {
+    trips = [
+      ...trips,
+      { ...currentTrip, comments: [...currentTrip?.comments, newComment] },
+    ];
+  }
+
+  return newComment;
 }
 
 export function toggleTripLike(
@@ -240,4 +254,3 @@ export function toggleTripLike(
   });
   return updatedTrip;
 }
-

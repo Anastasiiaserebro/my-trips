@@ -4,8 +4,6 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import type { Trip, User } from "../../lib/travelStore";
 import { Like } from "./Like";
-import { useAuthStore } from "@/lib/authStore";
-import { toggleTripLike } from "@/lib/travelApi";
 
 type TripCardProps = {
   trip: Trip;
@@ -13,27 +11,10 @@ type TripCardProps = {
 };
 
 export function TripCard({ trip, author }: TripCardProps) {
-  const likesCount = trip?.likedByUserIds.length;
-  const currentUser = useAuthStore((state) => state.currentUser);
-
-  const isLiked = currentUser && trip.likedByUserIds.includes(currentUser.id);
   const router = useRouter();
-
-  const onToggleLike = () =>
-    currentUser
-      ? async () => {
-          const updated = await toggleTripLike(trip.id, currentUser.id);
-        }
-      : undefined;
 
   const handleOpen = () => {
     router.push(`/trips/${trip.id}`);
-  };
-
-  const handleLike = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!onToggleLike) return;
-    onToggleLike();
   };
 
   const ratingStars = "★★★★★".slice(0, trip.rating);
@@ -82,7 +63,7 @@ export function TripCard({ trip, author }: TripCardProps) {
               })}
             </p>
           </div>
-          <Like isLiked={isLiked} trip={trip} />
+          <Like trip={trip} />
         </div>
         <div className="flex items-center justify-between border-t border-sky-50 pt-3 text-[11px] text-slate-500">
           <div className="flex items-center gap-2">

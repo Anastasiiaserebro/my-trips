@@ -1,3 +1,4 @@
+// TODO get from api
 export type User = {
   id: string;
   name: string;
@@ -10,6 +11,14 @@ export type Place = {
   name: string;
   city: string;
   note?: string;
+};
+
+export type Comment = {
+  id: string;
+  tripId: string;
+  authorId: string;
+  message: string;
+  createdAt: string;
 };
 
 export type Trip = {
@@ -30,12 +39,5 @@ export type Trip = {
   cafes: Place[];
   createdAt: string;
   likedByUserIds: string[];
-};
-
-export type Comment = {
-  id: string;
-  tripId: string;
-  authorId: string;
-  message: string;
-  createdAt: string;
+  comments: Comment[];
 };

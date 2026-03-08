@@ -3,18 +3,31 @@ import type { User, Trip, Comment } from "./travelStore";
 export type TravelSnapshot = {
   users: User[];
   trips: Trip[];
-  comments: Comment[];
 };
 
-const BASE_URL = process.env.NEXT_URL ?? 'http://localhost:3000';
+const BASE_URL = process.env.NEXT_URL ?? "http://localhost:3000";
 
-export async function fetchTravelSnapshot(): Promise<TravelSnapshot> {
+export async function fetchTravelData(): Promise<TravelSnapshot> {
   const response = await fetch(`${BASE_URL}/api/travel`, {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-    });
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+    next: { tags: ["travelData"] },
+  });
   if (!response.ok) {
     throw new Error("Не удалось загрузить данные о путешествиях");
+  }
+  return (await response.json()) as TravelSnapshot;
+}
+
+export async function fetchUserData(userId?: string): Promise<TravelSnapshot> {
+  const response = await fetch(`${BASE_URL}/api/travel/me`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Не удалось загрузить данные о пользователе");
   }
   return (await response.json()) as TravelSnapshot;
 }
@@ -75,4 +88,3 @@ export async function toggleTripLike(
 
   return (await response.json()) as Trip;
 }
-

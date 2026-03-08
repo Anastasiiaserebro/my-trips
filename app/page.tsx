@@ -1,25 +1,17 @@
 // import { useRouter } from "next/navigation";
 import { TripCard } from "../components/trip/TripCard";
 import type { Trip, User } from "../lib/travelStore";
-import { fetchTravelSnapshot, toggleTripLike } from "../lib/travelApi";
+import { fetchTravelData, toggleTripLike } from "../lib/travelApi";
 import { useAuthStore } from "../lib/authStore";
 import { Button } from "@radix-ui/themes/components/button";
 import Link from "next/link";
 import { RedirectLink } from "@/components/main/RedirectLink";
 
 export default async function Home() {
-  const snapshot = await fetchTravelSnapshot();
+  const snapshot = await fetchTravelData();
   const { users, trips } = snapshot;
 
   const topTrips = trips.slice(0, 3);
-
-  // const handlePrimaryClick = () => {
-  //   if (currentUser) {
-  //     router.push("/trips");
-  //   } else {
-  //     router.push("/login");
-  //   }
-  // };
 
   return (
     <div className="grid gap-6 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] md:items-stretch">

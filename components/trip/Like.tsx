@@ -6,19 +6,37 @@ import { useRouter } from "next/compat/router";
 
 interface Props {
   trip: Trip;
-  isLiked?: boolean;
 }
 
-export function Like({ isLiked, trip }: Props) {
+export function Like({ trip }: Props) {
   const router = useRouter();
   const currentUser = useAuthStore((state) => state.currentUser);
+  const likedTrips = useAuthStore((state) => state.likedTrips);
+
+  const likeTrips = useAuthStore((state) => state.likeTrip);
+  const dislikeLikedTrips = useAuthStore((state) => state.dislikeTrip);
+  const isLiked = likedTrips.includes(trip);
   //   const updated = await toggleTripLike(trip.id, currentUser.id);
+
+  // const onToggleLike = () =>
+  //   currentUser
+  //     ? async () => {
+  //         const updated = await toggleTripLike(trip.id, currentUser.id);
+  //       }
+  //     : undefined;
 
   const handleLikeClick = () => {
     if (!currentUser || !trip) {
       router?.push("/login");
       return;
     }
+
+    if (isLiked) {
+      dislikeLikedTrips(trip);
+      return;
+    }
+
+    likeTrips(trip);
   };
 
   return (

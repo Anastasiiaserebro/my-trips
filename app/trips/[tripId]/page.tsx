@@ -1,24 +1,8 @@
-// import { useRouter } from "next/navigation";
-// import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import type { Comment, Trip, User } from "../../../lib/travelStore";
-import {
-  addCommentToTrip,
-  fetchTravelSnapshot,
-  toggleTripLike,
-} from "../../../lib/travelApi";
-import { useAuthStore } from "../../../lib/authStore";
+import { fetchTravelData } from "../../../lib/travelApi";
 import Link from "next/link";
-
-const commentSchema = z.object({
-  message: z
-    .string()
-    .min(3, "Комментарий слишком короткий")
-    .max(400, "Максимум 400 символов"),
-});
-
-type CommentFormValues = z.infer<typeof commentSchema>;
+import { Like } from "@/components/trip/Like";
+import { CommentFrom } from "@/components/trip/CommentForm";
+import { revalidateTag } from "next/cache";
 
 export default async function TripDetailPage({
   params,
@@ -26,12 +10,11 @@ export default async function TripDetailPage({
   params: Promise<{ tripId: string }>;
 }) {
   const { tripId } = await params;
-  // const router = useRouter();
-  // const currentUser = useAuthStore((state) => state.currentUser);
+  // revalidateTag('travelData', 'travelData')
 
-  const snapshot = await fetchTravelSnapshot();
+  const snapshot = await fetchTravelData();
   const trip = snapshot.trips.find((t) => t.id === tripId);
-  const comments = snapshot.comments.filter((c) => c.tripId === tripId);
+  const comments = trip?.comments ?? [];
   const users = snapshot.users;
 
   const tripComments = comments
@@ -40,21 +23,6 @@ export default async function TripDetailPage({
       (a, b) =>
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
     );
-
-  // const isLiked =
-  //   !!currentUser && !!trip
-  //     ? trip.likedByUserIds.includes(currentUser.id)
-  //     : false;
-
-  // const {
-  //   register,
-  //   handleSubmit,
-  //   reset,
-  //   formState: { errors, isSubmitting },
-  // } = useForm<CommentFormValues>({
-  //   resolver: zodResolver(commentSchema),
-  //   defaultValues: { message: "" },
-  // });
 
   const author = users.find((u) => u.id === trip?.userId);
 
@@ -67,54 +35,20 @@ export default async function TripDetailPage({
         <Link href={`/trips`} className="rounded-full bg-sky-600 px-4 py-2">
           Вернуться к списку
         </Link>
-        {/* <button
-          type="button"
-          onClick={() => router.push("/trips")}
-          className="rounded-full bg-sky-600 px-4 py-2 text-xs font-semibold text-white hover:bg-sky-500"
-        >
-          Вернуться к списку
-        </button> */}
       </div>
     );
   }
 
   const ratingStars = "★★★★★".slice(0, trip.rating);
 
-  // const onSubmit = async (values: CommentFormValues) => {
-  //   if (!currentUser) {
-  //     router.push("/login");
-  //     return;
-  //   }
-  //   const created = await addCommentToTrip(
-  //     trip.id,
-  //     currentUser.id,
-  //     values.message.trim(),
-  //   );
-  //   setComments((prev) => [...prev, created]);
-  //   reset({ message: "" });
-  // };
-
-  // const handleLikeClick = () => {
-  //   if (!currentUser || !trip) {
-  //     router.push("/login");
-  //     return;
-  //   }
-  //   void (async () => {
-  //     const updated = await toggleTripLike(trip.id, currentUser.id);
-  //     setTrip(updated);
-  //   })();
-  // };
-
   return (
     <div className="glass-card space-y-6 bg-white/95 p-6 sm:p-8">
-      {/* <button
-        type="button"
-        onClick={() => router.back()}
+      <Link
+        href={`/trips`}
         className="text-xs font-medium text-sky-700 hover:text-sky-600"
       >
         ← Назад к путешествиям
-      </button> */}
-
+      </Link>
       <header className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-600">
@@ -147,18 +81,7 @@ export default async function TripDetailPage({
               {trip.approximateCost.toLocaleString("ru-RU")} {trip.currency}
             </span>
           </div>
-          {/* <button
-            type="button"
-            onClick={handleLikeClick}
-            className={`inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold ${
-              isLiked
-                ? "bg-rose-500/10 text-rose-500"
-                : "bg-sky-50 text-slate-600 hover:bg-sky-100"
-            }`}
-          >
-            <span>{isLiked ? "♥" : "♡"}</span>
-            <span>{trip.likedByUserIds.length} лайков</span>
-          </button> */}
+          <Like trip={trip} />
         </div>
       </header>
 
@@ -243,36 +166,7 @@ export default async function TripDetailPage({
               КОММЕНТАРИИ
             </p>
 
-            {/* <form className="mt-3 space-y-2" onSubmit={handleSubmit(onSubmit)}>
-              <textarea
-                rows={3}
-                placeholder={
-                  currentUser
-                    ? "Поделитесь впечатлением или задайте вопрос..."
-                    : "Только авторизованные друзья могут оставлять комментарии."
-                }
-                className="w-full resize-none rounded-2xl border border-sky-100 bg-sky-50/60 px-3 py-2 text-xs text-slate-800 outline-none ring-sky-400 focus:bg-white focus:ring-2 disabled:opacity-60"
-                {...register("message")}
-                disabled={!currentUser || isSubmitting}
-              />
-              {errors.message && (
-                <p className="text-[11px] text-rose-500">
-                  {errors.message.message}
-                </p>
-              )}
-              <div className="flex items-center justify-between">
-                <p className="text-[11px] text-slate-500">
-                  Комментарии видят все авторизованные друзья.
-                </p>
-                <button
-                  type="submit"
-                  disabled={!currentUser || isSubmitting}
-                  className="rounded-full bg-sky-600 px-4 py-1.5 text-xs font-semibold text-white disabled:cursor-not-allowed disabled:bg-sky-300"
-                >
-                  Отправить
-                </button>
-              </div>
-            </form> */}
+            <CommentFrom trip={trip} />
 
             <div className="mt-4 space-y-3">
               {tripComments.length === 0 ? (

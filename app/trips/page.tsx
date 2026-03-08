@@ -1,8 +1,8 @@
 import { TripCard } from "../../components/trip/TripCard";
-import { fetchTravelSnapshot, toggleTripLike } from "../../lib/travelApi";
+import { fetchTravelData } from "../../lib/travelApi";
 
 export default async function TripsPage() {
-  const snapshot = await fetchTravelSnapshot();
+  const snapshot = await fetchTravelData();
   const { users, trips } = snapshot;
 
   return (

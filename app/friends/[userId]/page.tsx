@@ -1,5 +1,5 @@
 import { TripCard } from "../../../components/trip/TripCard";
-import { fetchTravelSnapshot, toggleTripLike } from "../../../lib/travelApi";
+import { fetchTravelData, toggleTripLike } from "../../../lib/travelApi";
 import Link from "next/link";
 
 export default async function FriendProfilePage({
@@ -8,7 +8,7 @@ export default async function FriendProfilePage({
   params: Promise<{ userId: string }>;
 }) {
   const { userId } = await params;
-  const { users, trips } = await fetchTravelSnapshot();
+  const { users, trips } = await fetchTravelData();
 
   const user = users.find((u) => u.id === userId);
   const userTrips = trips.filter((t) => t.userId === userId);
@@ -31,10 +31,7 @@ export default async function FriendProfilePage({
 
   return (
     <div className="space-y-5">
-      <Link
-        href="/friends"
-        className="text-xs font-medium text-sky-700 hover:text-sky-600"
-      >
+      <Link href="/friends" className="text-xs font-medium hover:text-sky-200">
         ← Назад к друзьям
       </Link>
 

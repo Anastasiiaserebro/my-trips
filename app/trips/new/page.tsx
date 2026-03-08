@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -23,11 +23,7 @@ const tripSchema = z
       .string()
       .min(1, "Укажите примерную стоимость")
       .transform((value) => Number(value.replace(/\s/g, "")))
-      .pipe(
-        z
-          .number()
-          .positive("Стоимость должна быть положительным числом"),
-      ),
+      .pipe(z.number().positive("Стоимость должна быть положительным числом")),
     currency: z.enum(["₽", "€", "$"]),
     rating: z
       .string()
@@ -44,14 +40,8 @@ const tripSchema = z
       .max(1000, "Максимум 1000 символов")
       .optional()
       .transform((value) => value?.trim() || undefined),
-    attractionsRaw: z
-      .string()
-      .max(1000, "Максимум 1000 символов")
-      .optional(),
-    cafesRaw: z
-      .string()
-      .max(1000, "Максимум 1000 символов")
-      .optional(),
+    attractionsRaw: z.string().max(1000, "Максимум 1000 символов").optional(),
+    cafesRaw: z.string().max(1000, "Максимум 1000 символов").optional(),
     coverImage: z
       .string()
       .url("Введите корректный URL для обложки")
@@ -60,8 +50,7 @@ const tripSchema = z
   })
   .refine(
     (data) =>
-      new Date(data.endDate).getTime() >=
-      new Date(data.startDate).getTime(),
+      new Date(data.endDate).getTime() >= new Date(data.startDate).getTime(),
     {
       message: "Дата окончания не может быть раньше начала",
       path: ["endDate"],
@@ -126,10 +115,11 @@ export default function NewTripPage() {
       coverImage:
         values.coverImage && values.coverImage.length > 0
           ? values.coverImage
-          : "https://images.pexels.com/photos/346885/pexels-photo-346885.jpeg?auto=compress&cs=tinysrgb&w=1200",
+          : "https://era74.ru/media/catalog/2019/08/06/no-photo_94BoRIW.png",
       notes: values.notes,
       attractions,
       cafes,
+      comments: [],
     });
 
     router.push("/trips");
@@ -336,7 +326,9 @@ export default function NewTripPage() {
             <textarea
               rows={4}
               className="w-full rounded-2xl border border-sky-100 bg-sky-50/60 px-3 py-2 text-xs text-slate-800 outline-none ring-sky-400 focus:bg-white focus:ring-2"
-              placeholder={"Голубая мечеть — лучше приходить к открытию\nГалатская башня — идеальный закат"}
+              placeholder={
+                "Голубая мечеть — лучше приходить к открытию\nГалатская башня — идеальный закат"
+              }
               {...register("attractionsRaw")}
             />
             {errors.attractionsRaw && (
@@ -394,4 +386,3 @@ export default function NewTripPage() {
     </div>
   );
 }
-

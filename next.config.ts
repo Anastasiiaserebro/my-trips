@@ -8,6 +8,11 @@ const nextConfig: NextConfig = {
         hostname: "media.istockphoto.com",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: " era74.ru",
+        pathname: "/**",
+      },
     ],
   },
 };
